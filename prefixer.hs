@@ -136,7 +136,7 @@ addLikeTerms (Exp Plus ts) = let xs = (foldr (\x acc -> if isTerm x && isZero x 
                                             $ foldr (\x acc -> addLikeTermsHelper x : acc) [] 
                                             $ groupBy varsEqual 
                                             $ sortBy (compare `on` getVarStr) ts)
-                                in if xs == []
+                                in if null xs
                                     then Term 0 "" ""
                                     else Exp Plus xs
 addLikeTerms _ = error "ERROR: Bad input for addLikeTerms"
@@ -212,16 +212,15 @@ fromIrToPrefixHelper _ = error "ERROR: Bad input for fromIrToPrefixHelper"
 fromTermToPrefix :: Exp -> String
 fromTermToPrefix (Term c "" "") = show c
 fromTermToPrefix (Term c "" d) = take (4 * length d) (cycle "( / ") ++ show c ++ foldl (\acc x -> " " ++ [x] ++ " )" ++ acc) [] d
-fromTermToPrefix (Term c m d) = if c == 1 
-                                    then take (4 * length d) (cycle "( / ")
-                                            ++ take (4 * (length m - 1)) (cycle "( * ")
-                                            ++ head m : foldl (\acc x -> " " ++ [x] ++ " )" ++ acc) [] (tail m)
-                                            ++ foldl (\acc x -> " " ++ [x] ++ " )" ++ acc) [] d
-                                    else take (4 * length d) (cycle "( / ")
-                                            ++ take (4 * length m) (cycle "( * ") 
-                                            ++ show c
-                                            ++ foldl (\acc x -> " " ++ [x] ++ " )" ++ acc) [] m 
-                                            ++ foldl (\acc x -> " " ++ [x] ++ " )" ++ acc) [] d
+fromTermToPrefix (Term 1 m d) = take (4 * length d) (cycle "( / ")
+                                    ++ take (4 * (length m - 1)) (cycle "( * ")
+                                    ++ head m : foldl (\acc x -> " " ++ [x] ++ " )" ++ acc) [] (tail m)
+                                    ++ foldl (\acc x -> " " ++ [x] ++ " )" ++ acc) [] d
+fromTermToPrefix (Term c m d) = take (4 * length d) (cycle "( / ")
+                                    ++ take (4 * length m) (cycle "( * ") 
+                                    ++ show c
+                                    ++ foldl (\acc x -> " " ++ [x] ++ " )" ++ acc) [] m 
+                                    ++ foldl (\acc x -> " " ++ [x] ++ " )" ++ acc) [] d
 fromTermToPrefix e = fromIrToPrefix e
 
 --takes in the command line arguments and either converts to prefix or reduces and converts
